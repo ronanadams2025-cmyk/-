@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TechnoMarket AI — Интеллектуальный магазин электроники</title>
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --panel: #131a26;
+      --panel-2: #192232;
+      --border: #263349;
+      --text: #eef3fb;
+      --muted: #93a4be;
+      --accent: #4f8cff;
+      --accent-2: #18c29c;
+      --warn: #f5b041;
+      --danger: #ef5350;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(11, 15, 23, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .badge {
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(79, 140, 255, 0.16);
+      color: #8cb6ff;
+      border: 1px solid rgba(79, 140, 255, 0.35);
+    }
+    .controls-top {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    select, input, button {
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 11px;
+      font-size: 0.88rem;
+    }
+    button {
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+    button:hover { border-color: var(--accent); }
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+    button.success {
+      background: rgba(24, 194, 156, 0.16);
+      border-color: rgba(24, 194, 156, 0.45);
+      color: #6df0d3;
+    }
+    button.danger {
+      background: rgba(239, 83, 80, 0.14);
+      border-color: rgba(239, 83, 80, 0.4);
+      color: #ff9c9a;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 290px 1fr 330px;
+      gap: 16px;
+      padding: 16px 20px;
+      max-width: 1680px;
+      margin: 0 auto;
+    }
+    @media (max-width: 1260px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    h2, h3 { margin: 0 0 10px 0; font-size: 1rem; }
+    .muted { color: var(--muted); font-size: 0.84rem; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .pill {
+      font-size: 0.76rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+    }
+    .trait-item {
+      display: grid;
+      grid-template-columns: 112px 1fr 44px;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.8rem;
+      margin-bottom: 6px;
+    }
+    .bar-bg {
+      height: 7px;
+      background: #0d131d;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+    .grid-products {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+      gap: 12px;
+    }
+    .prod {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .prod-top { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+    .price { font-weight: 700; color: #8be9d2; font-size: 0.98rem; }
+    .score-tag {
+      font-size: 0.75rem;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(79, 140, 255, 0.16);
+      color: #9ec0ff;
+      white-space: nowrap;
+    }
+    .prod-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+    .prod-actions button { padding: 5px 8px; font-size: 0.78rem; }
+    .radar-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 820px) {
+      .radar-grid { grid-template-columns: 1fr; }
+    }
+    .radar-box {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+    }
+    .log-list {
+      max-height: 220px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.8rem;
+    }
+    .log-entry {
+      background: var(--panel-2);
+      border-left: 3px solid var(--accent);
+      padding: 6px 8px;
+      border-radius: 6px;
+    }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 16px;
+    }
+    .modal {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      max-width: 640px;
+      width: 100%;
+      padding: 18px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .rel-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: var(--panel-2);
+      margin-bottom: 6px;
+      font-size: 0.82rem;
+    }
+    .tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .tab-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span>TechnoMarket AI</span>
+      <span class="badge">200 товаров • 8 категорий • 24 подкатегории</span>
+    </div>
+    <div class="controls-top">
+      <label class="muted">Покупатель:
+        <select id="userSelect"></select>
+      </label>
+      <button id="newVisitBtn" class="primary">Новое посещение</button>
+      <button id="resetDemoBtn">Сброс модели</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- Левая колонка: Профиль, группы и 12 признаков -->
+    <aside>
+      <div class="card">
+        <h2 id="profileTitle">Профиль покупателя</h2>
+        <div id="profileMeta" class="muted"></div>
+        <div id="profileGroups" class="pill-row"></div>
+      </div>
+
+      <div class="card">
+        <h3>12 признаков предпочтений (0.00–1.00)</h3>
+        <div id="traitsList"></div>
+      </div>
+    </aside>
+
+    <!-- Центральная колонка: Подборки, Smart Budget Radar, Каталог -->
+    <main>
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div>
+            <h2>Топ-5 персональных рекомендаций (AI Shopping Brain)</h2>
+            <div class="muted">Формула: S_final = 0.50·S_personal + 0.20·S_group + 0.20·S_related + 0.10·S_popular</div>
+          </div>
+        </div>
+        <div id="topRecsGrid" class="grid-products" style="margin-top:12px;"></div>
+      </div>
+
+      <div class="card">
+        <h3>Smart Budget Radar — подбор под бюджет</h3>
+        <div id="budgetRadar" class="radar-grid"></div>
+      </div>
+
+      <div class="card">
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="catalog">Каталог (200 товаров)</button>
+          <button class="tab-btn" data-tab="techmatch">TechMatch и Smart Upgrade</button>
+        </div>
+
+        <div id="tabCatalog">
+          <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+            <select id="catFilter"></select>
+            <select id="subcatFilter"></select>
+            <input id="searchInput" type="search" placeholder="Поиск по ID (TM001) или названию..." style="min-width:220px;" />
+          </div>
+          <div id="catalogGrid" class="grid-products"></div>
+        </div>
+
+        <div id="tabTechmatch" style="display:none;">
+          <h3>TechMatch — проверка совместимости и связи товаров</h3>
+          <div class="muted" style="margin-bottom:8px;">Выберите базовый товар, чтобы увидеть связанные позиции (Complementary, Compatible, Alternative, Upgrade) и проверку совместимости.</div>
+          <select id="baseProductSelect" style="width:100%; margin-bottom:10px;"></select>
+          <div id="relationsBox"></div>
+          <h3 style="margin-top:16px;">Smart Upgrade — апгрейды после покупок</h3>
+          <div id="upgradesBox"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Правая колонка: Корзина, заказы и журнал событий -->
+    <aside>
+      <div class="card">
+        <h2>Корзина (<span id="cartCount">0</span>)</h2>
+        <div id="cartItems" class="muted">Корзина пуста</div>
+        <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+          <strong id="cartTotal">0 ₸</strong>
+          <button id="checkoutBtn" class="primary">Оформить заказ</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Купленные товары и возвраты</h3>
+        <div id="ordersBox" class="muted">Покупок пока нет</div>
+      </div>
+
+      <div class="card">
+        <h3>Журнал событий и пересчёта</h3>
+        <div id="eventLog" class="log-list"></div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Модальное окно Explainable AI ("Почему мне это рекомендуют?") -->
+  <div id="explainModal" class="modal-backdrop">
+    <div class="modal">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 id="explainTitle">Why This Product?</h3>
+        <button id="closeModalBtn">Закрыть</button>
+      </div>
+      <div id="explainBody" style="margin-top:10px; font-size:0.88rem;"></div>
+    </div>
+  </div>
+
+  <script>
+    const TRAITS = [
+      "Gaming", "Performance", "Budget", "Premium", "Portability",
+      "Apple", "Android", "Audio", "Photography", "Smart Home",
+      "Accessories", "Energy Saving"
+    ];
+
+    const GROUPS = [
+      "Power Users",
+      "Smart Savers",
+      "Digital Creators",
+      "Smart Lifestyle"
+    ];
+
+    const GROUP_CATEGORY = {
+      "Power Users": {
+        "Компьютеры и ноутбуки": 0.95,
+        "Смартфоны и планшеты": 0.65,
+        "Аудиотехника": 0.70,
+        "Игровая техника": 0.98,
+        "Компьютерные комплектующие": 0.96,
+        "Телевизоры и мониторы": 0.85,
+        "Фото- и видеотехника": 0.55,
+        "Умный дом": 0.50
+      },
+      "Smart Savers": {
+        "Компьютеры и ноутбуки": 0.55,
+        "Смартфоны и планшеты": 0.90,
+        "Аудиотехника": 0.65,
+        "Игровая техника": 0.35,
+        "Компьютерные комплектующие": 0.50,
+        "Телевизоры и мониторы": 0.60,
+        "Фото- и видеотехника": 0.40,
+        "Умный дом": 0.72
+      },
+      "Digital Creators": {
+        "Компьютеры и ноутбуки": 0.95,
+        "Смартфоны и планшеты": 0.55,
+        "Аудиотехника": 0.85,
+        "Игровая техника": 0.60,
+        "Компьютерные комплектующие": 0.88,
+        "Телевизоры и мониторы": 0.94,
+        "Фото- и видеотехника": 0.97,
+        "Умный дом": 0.40
+      },
+      "Smart Lifestyle": {
+        "Компьютеры и ноутбуки": 0.30,
+        "Смартфоны и планшеты": 0.70,
+        "Аудиотехника": 0.65,
+        "Игровая техника": 0.20,
+        "Компьютерные комплектующие": 0.25,
+        "Телевизоры и мониторы": 0.68,
+        "Фото- и видеотехника": 0.50,
+        "Умный дом": 0.98
+      }
+    };
+
+    const CATALOG_BLUEPRINT = [
+      { cat: "Компьютеры и ноутбуки", sub: ["Ноутбуки", "Персональные компьютеры", "Моноблоки"] },
+      { cat: "Смартфоны и планшеты", sub: ["Смартфоны", "Планшеты", "Электронные книги"] },
+      { cat: "Аудиотехника", sub: ["Наушники", "Колонки", "Микрофоны"] },
+      { cat: "Игровая техника", sub: ["Игровые консоли", "Геймпады", "Игровые аксессуары"] },
+      { cat: "Компьютерные комплектующие", sub: ["Процессоры", "Видеокарты", "Оперативная память"] },
+      { cat: "Телевизоры и мониторы", sub: ["Телевизоры", "Мониторы", "Проекторы"] },
+      { cat: "Фото- и видеотехника", sub: ["Фотоаппараты", "Видеокамеры", "Объективы"] },
+      { cat: "Умный дом", sub: ["Умные лампы", "Камеры видеонаблюдения", "Умные розетки"] }
+    ];
+
+    const FEATURED_ITEMS = {
+      "TM001": { name: "ASUS ROG Strix G16", price: 750000, sub: "Ноутбуки", traits: { Gaming: 1.00, Performance: 0.95, Budget: 0.20, Premium: 0.85, Portability: 0.55, Apple: 0.00, Android: 0.00, Audio: 0.20, Photography: 0.10, "Smart Home": 0.05, Accessories: 0.30, "Energy Saving": 0.30 } },
+      "TM002": { name: "Lenovo Legion 5", price: 620000, sub: "Ноутбуки", traits: { Gaming: 0.92, Performance: 0.88, Budget: 0.35, Premium: 0.72, Portability: 0.60, Apple: 0.00, Android: 0.00, Audio: 0.25, Photography: 0.10, "Smart Home": 0.05, Accessories: 0.25, "Energy Saving": 0.35 } },
+      "TM003": { name: "MacBook Air M3", price: 650000, sub: "Ноутбуки", traits: { Gaming: 0.15, Performance: 0.75, Budget: 0.35, Premium: 0.85, Portability: 0.95, Apple: 1.00, Android: 0.00, Audio: 0.25, Photography: 0.25, "Smart Home": 0.15, Accessories: 0.40, "Energy Saving": 0.92 } },
+      "TM004": { name: "Samsung Galaxy S25", price: 450000, sub: "Смартфоны", traits: { Gaming: 0.55, Performance: 0.82, Budget: 0.45, Premium: 0.80, Portability: 0.92, Apple: 0.00, Android: 1.00, Audio: 0.30, Photography: 0.78, "Smart Home": 0.45, Accessories: 0.50, "Energy Saving": 0.75 } },
+      "TM005": { name: "Sony WH-1000XM5", price: 180000, sub: "Наушники", traits: { Gaming: 0.10, Performance: 0.20, Budget: 0.45, Premium: 0.82, Portability: 0.85, Apple: 0.40, Android: 0.45, Audio: 1.00, Photography: 0.05, "Smart Home": 0.10, Accessories: 0.60, "Energy Saving": 0.70 } },
+      "TM030": { name: "Мышь Logitech G Pro X", price: 68000, sub: "Игровые аксессуары", traits: { Gaming: 0.96, Performance: 0.75, Budget: 0.55, Premium: 0.75, Portability: 0.85, Apple: 0.30, Android: 0.00, Audio: 0.00, Photography: 0.00, "Smart Home": 0.00, Accessories: 0.95, "Energy Saving": 0.60 } },
+      "TM045": { name: "Монитор ASUS ROG 27\" 165Hz", price: 240000, sub: "Мониторы", traits: { Gaming: 0.94, Performance: 0.84, Budget: 0.40, Premium: 0.78, Portability: 0.20, Apple: 0.20, Android: 0.00, Audio: 0.10, Photography: 0.55, "Smart Home": 0.00, Accessories: 0.45, "Energy Saving": 0.45 } }
+    };
+
+    function build200Products() {
+      const products = [];
+      let idx = 1;
+      for (const block of CATALOG_BLUEPRINT) {
+        for (let i = 0; i < 25; i++) {
+          const id = `TM${String(idx).padStart(3, "0")}`;
+          const sub = block.sub[i % block.sub.length];
+          if (FEATURED_ITEMS[id]) {
+            const f = FEATURED_ITEMS[id];
+            products.push({
+              id,
+              name: f.name,
+              category: block.cat,
+              subcategory: f.sub || sub,
+              price: f.price,
+              popularity: 0.92,
+              traits: f.traits
+            });
+          } else {
+            const price = 25000 + ((i * 37000 + idx * 4500) % 720000);
+            const t = {};
+            TRAITS.forEach((tr, k) => {
+              t[tr] = Number(((Math.sin(idx * 1.7 + k * 2.1) + 1) / 2).toFixed(2));
+            });
+            if (block.cat === "Игровая техника") t.Gaming = Math.max(t.Gaming, 0.85);
+            if (block.cat === "Умный дом") { t["Smart Home"] = Math.max(t["Smart Home"], 0.88); t["Energy Saving"] = Math.max(t["Energy Saving"], 0.80); }
+            if (block.cat === "Фото- и видеотехника") t.Photography = Math.max(t.Photography, 0.88);
+            if (block.cat === "Аудиотехника") t.Audio = Math.max(t.Audio, 0.85);
+            if (price < 150000) t.Budget = Math.max(t.Budget, 0.82);
+            if (price > 500000) t.Premium = Math.max(t.Premium, 0.80);
+
+            products.push({
+              id,
+              name: `${sub} ${block.cat.split(" ")[0]} #${idx}`,
+              category: block.cat,
+              subcategory: sub,
+              price,
+              popularity: Number((0.45 + ((idx * 13) % 50) / 100).toFixed(2)),
+              traits: t
+            });
+          }
+          idx++;
+        }
+      }
+      return products;
+    }
+
+    function buildRelations(products) {
+      const rels = [];
+      const addRel = (from, to, type, weight) => {
+        if (from !== to && products.some(p => p.id === from) && products.some(p => p.id === to)) {
+          rels.push({ from, to, type, weight });
+        }
+      };
+      addRel("TM001", "TM030", "Complementary", 0.95);
+      addRel("TM001", "TM045", "Compatible", 0.90);
+      addRel("TM001", "TM002", "Alternative", 0.75);
+      addRel("TM001", "TM003", "Upgrade", 0.85);
+      addRel("TM002", "TM030", "Complementary", 0.90);
+      addRel("TM003", "TM005", "Complementary", 0.88);
+      addRel("TM004", "TM005", "Complementary", 0.82);
+
+      for (let i = 0; i < products.length; i++) {
+        const cur = products[i];
+        const next = products[(i + 1) % products.length];
+        const step5 = products[(i + 5) % products.length];
+        const step25 = products[(i + 25) % products.length];
+        addRel(cur.id, next.id, "Alternative", 0.78);
+        addRel(cur.id, step5.id, "Upgrade", 0.84);
+        addRel(cur.id, step25.id, "Complementary", 0.86);
+      }
+      return rels;
+    }
+
+    const INITIAL_USERS = [
+      { id: "U001", name: "Дәулет", focus: "Игровая техника", minB: 500000, maxB: 800000, traits: { Gaming: 0.95, Performance: 0.90, Budget: 0.30, Premium: 0.70, Portability: 0.55, Apple: 0.20, Android: 0.25, Audio: 0.65, Photography: 0.20, "Smart Home": 0.15, Accessories: 0.75, "Energy Saving": 0.30 } },
+      { id: "U002", name: "Арман", focus: "Смартфоны", minB: 200000, maxB: 400000, traits: { Gaming: 0.15, Performance: 0.30, Budget: 0.85, Premium: 0.30, Portability: 0.80, Apple: 0.35, Android: 0.85, Audio: 0.40, Photography: 0.60, "Smart Home": 0.45, Accessories: 0.55, "Energy Saving": 0.75 } },
+      { id: "U003", name: "Алихан", focus: "Комплектующие", minB: 300000, maxB: 600000, traits: { Gaming: 0.85, Performance: 0.95, Budget: 0.40, Premium: 0.75, Portability: 0.25, Apple: 0.10, Android: 0.20, Audio: 0.35, Photography: 0.30, "Smart Home": 0.20, Accessories: 0.70, "Energy Saving": 0.45 } },
+      { id: "U004", name: "Диана", focus: "Apple и аксессуары", minB: 200000, maxB: 500000, traits: { Gaming: 0.20, Performance: 0.40, Budget: 0.45, Premium: 0.90, Portability: 0.88, Apple: 0.95, Android: 0.05, Audio: 0.70, Photography: 0.65, "Smart Home": 0.50, Accessories: 0.90, "Energy Saving": 0.80 } },
+      { id: "U005", name: "Тимур", focus: "Аудиотехника", minB: 100000, maxB: 250000, traits: { Gaming: 0.35, Performance: 0.45, Budget: 0.65, Premium: 0.65, Portability: 0.85, Apple: 0.45, Android: 0.50, Audio: 0.96, Photography: 0.20, "Smart Home": 0.35, Accessories: 0.75, "Energy Saving": 0.70 } },
+      { id: "U006", name: "Аружан", focus: "Умный дом", minB: 50000, maxB: 150000, traits: { Gaming: 0.10, Performance: 0.35, Budget: 0.75, Premium: 0.50, Portability: 0.70, Apple: 0.40, Android: 0.65, Audio: 0.45, Photography: 0.35, "Smart Home": 0.96, Accessories: 0.60, "Energy Saving": 0.92 } },
+      { id: "U007", name: "Руслан", focus: "Профессиональная техника", minB: 500000, maxB: 900000, traits: { Gaming: 0.40, Performance: 0.96, Budget: 0.25, Premium: 0.92, Portability: 0.50, Apple: 0.60, Android: 0.30, Audio: 0.75, Photography: 0.92, "Smart Home": 0.25, Accessories: 0.65, "Energy Saving": 0.55 } },
+      { id: "U008", name: "Мадина", focus: "Недорогие устройства", minB: 50000, maxB: 200000, traits: { Gaming: 0.20, Performance: 0.35, Budget: 0.95, Premium: 0.20, Portability: 0.75, Apple: 0.20, Android: 0.80, Audio: 0.50, Photography: 0.30, "Smart Home": 0.60, Accessories: 0.65, "Energy Saving": 0.85 } },
+      { id: "U009", name: "Нұрлан", focus: "Компьютеры", minB: 300000, maxB: 700000, traits: { Gaming: 0.60, Performance: 0.86, Budget: 0.50, Premium: 0.70, Portability: 0.65, Apple: 0.45, Android: 0.35, Audio: 0.45, Photography: 0.35, "Smart Home": 0.35, Accessories: 0.60, "Energy Saving": 0.65 } },
+      { id: "U010", name: "Ержан", focus: "Игровые аксессуары", minB: 100000, maxB: 300000, traits: { Gaming: 0.90, Performance: 0.72, Budget: 0.65, Premium: 0.60, Portability: 0.80, Apple: 0.25, Android: 0.30, Audio: 0.75, Photography: 0.15, "Smart Home": 0.20, Accessories: 0.95, "Energy Saving": 0.55 } }
+    ];
+
+    const DELTA_MAP = {
+      view: { delta: 0.03, label: "Просмотр товара (+0.03)" },
+      revisit: { delta: 0.02, label: "Повторный просмотр (+0.02)" },
+      fav: { delta: 0.08, label: "Добавление в избранное (+0.08)" },
+      cart: { delta: 0.12, label: "Добавление в корзину (+0.12)" },
+      buy: { delta: 0.20, label: "Покупка (+0.20)" },
+      unfav: { delta: -0.08, label: "Удаление из избранного (-0.08)" },
+      returnItem: { delta: -0.15, label: "Возврат товара (-0.15)" }
+    };
+
+    const products = build200Products();
+    const relations = buildRelations(products);
+
+    let state = {
+      activeUserId: "U001",
+      users: JSON.parse(JSON.stringify(INITIAL_USERS)),
+      cart: [],
+      orders: [],
+      logs: []
+    };
+
+    function getUser() {
+      return state.users.find(u => u.id === state.activeUserId) || state.users[0];
+    }
+
+    function detectGroups(user) {
+      const assigned = [];
+      if (user.traits.Gaming >= 0.75 || user.traits.Performance >= 0.85) assigned.push("Power Users");
+      if (user.traits.Budget >= 0.75) assigned.push("Smart Savers");
+      if (user.traits.Photography >= 0.75 || (user.traits.Performance >= 0.75 && user.traits.Audio >= 0.70)) assigned.push("Digital Creators");
+      if (user.traits["Smart Home"] >= 0.75 || user.traits["Energy Saving"] >= 0.85) assigned.push("Smart Lifestyle");
+      return assigned.length ? assigned : ["Smart Savers"];
+    }
+
+    function applyDelta(user, product, actionKey) {
+      const info = DELTA_MAP[actionKey];
+      if (!info) return;
+      const topTraits = TRAITS
+        .slice()
+        .sort((a, b) => (product.traits[b] || 0) - (product.traits[a] || 0))
+        .slice(0, 2);
+
+      topTraits.forEach(tr => {
+        const oldVal = user.traits[tr] ?? 0.5;
+        const nextVal = Math.min(1, Math.max(0, Number((oldVal + info.delta).toFixed(2))));
+        user.traits[tr] = nextVal;
+      });
+
+      state.logs.unshift(`${user.name}: ${info.label} — ${product.id} ${product.name} [${topTraits.join(", ")}]`);
+      if (state.logs.length > 40) state.logs.pop();
+    }
+
+    function scoreProduct(user, product) {
+      let num = 0;
+      let den = 0;
+      for (const tr of TRAITS) {
+        const p = user.traits[tr] ?? 0;
+        const t = product.traits[tr] ?? 0;
+        num += p * t;
+        den += Math.abs(p);
+      }
+      const sPersonal = den > 0 ? num / den : 0;
+
+      const userGroups = detectGroups(user);
+      const sGroup = Math.max(...userGroups.map(g => GROUP_CATEGORY[g]?.[product.category] ?? 0.5));
+
+      const activeProdId = state.cart[0]?.id || state.orders[0]?.items?.[0]?.id || "TM001";
+      const rel = relations.find(r => r.from === activeProdId && r.to === product.id);
+      const sRelated = rel ? rel.weight : 0.25;
+
+      const sPopular = product.popularity;
+      const sFinal = 0.50 * sPersonal + 0.20 * sGroup + 0.20 * sRelated + 0.10 * sPopular;
+
+      return {
+        final: Number(sFinal.toFixed(3)),
+        personal: Number(sPersonal.toFixed(3)),
+        group: Number(sGroup.toFixed(3)),
+        related: Number(sRelated.toFixed(3)),
+        popular: Number(sPopular.toFixed(3)),
+        groups: userGroups,
+        relType: rel ? rel.type : "Базовая связь"
+      };
+    }
+
+    function renderAll() {
+      const user = getUser();
+      const groups = detectGroups(user);
+
+      // Шапка: выбор пользователя
+      const userSelect = document.getElementById("userSelect");
+      userSelect.innerHTML = state.users.map(u =>
+        `<option value="${u.id}" ${u.id === user.id ? "selected" : ""}>${u.id} — ${u.name} (${u.focus})</option>`
+      ).join("");
+
+      // Левая панель
+      document.getElementById("profileTitle").textContent = `${user.name} (${user.id})`;
+      document.getElementById("profileMeta").textContent =
+        `Фокус: ${user.focus} • Бюджет: ${user.minB.toLocaleString("ru-RU")}–${user.maxB.toLocaleString("ru-RU")} ₸`;
+      document.getElementById("profileGroups").innerHTML = groups.map(g => `<span class="pill">${g}</span>`).join("");
+
+      document.getElementById("traitsList").innerHTML = TRAITS.map(tr => {
+        const val = user.traits[tr] ?? 0;
+        return `
+          <div class="trait-item">
+            <span>${tr}</span>
+            <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(val * 100)}%"></div></div>
+            <span>${val.toFixed(2)}</span>
+          </div>`;
+      }).join("");
+
+      // Топ-5 рекомендаций
+      const ranked = products
+        .map(p => ({ product: p, sc: scoreProduct(user, p) }))
+        .sort((a, b) => b.sc.final - a.sc.final);
+
+      document.getElementById("topRecsGrid").innerHTML = ranked.slice(0, 5).map(({ product, sc }) =>
+        renderProductCard(product, sc)
+      ).join("");
+
+      // Smart Budget Radar
+      const econ = products.find(p => p.price <= user.minB) || products.slice().sort((a, b) => a.price - b.price)[0];
+      const opt = ranked.find(({ product }) => product.price >= user.minB && product.price <= user.maxB)?.product || ranked[1].product;
+      const prem = products.find(p => p.price >= user.maxB) || products.slice().sort((a, b) => b.price - a.price)[0];
+
+      document.getElementById("budgetRadar").innerHTML = [
+        { title: "Экономный", item: econ },
+        { title: "Оптимальный", item: opt },
+        { title: "Премиальный", item: prem }
+      ].map(b => `
+        <div class="radar-box">
+          <div class="muted">${b.title}</div>
+          <div style="font-weight:600; margin:4px 0;">${b.item.id} • ${b.item.name}</div>
+          <div class="price">${b.item.price.toLocaleString("ru-RU")} ₸</div>
+          <button style="margin-top:8px;" onclick="addToCart('${b.item.id}')">В корзину</button>
+        </div>`).join("");
+
+      // Фильтры каталога
+      renderFilters();
+      renderCatalogGrid();
+      renderTechMatch(user);
+      renderCartAndOrders();
+      renderLogs();
+    }
+
+    function renderProductCard(p, sc) {
+      return `
+        <div class="prod">
+          <div>
+            <div class="prod-top">
+              <div>
+                <div class="muted">${p.id} • ${p.subcategory}</div>
+                <div style="font-weight:600;">${p.name}</div>
+              </div>
+              <span class="score-tag">S: ${sc.final.toFixed(2)}</span>
+            </div>
+            <div class="price" style="margin-top:6px;">${p.price.toLocaleString("ru-RU")} ₸</div>
+          </div>
+          <div class="prod-actions">
+            <button onclick="interact('${p.id}', 'view')">Просмотр</button>
+            <button onclick="interact('${p.id}', 'fav')">В избранное</button>
+            <button class="success" onclick="addToCart('${p.id}')">В корзину</button>
+            <button onclick="openExplain('${p.id}')">Why?</button>
+          </div>
+        </div>`;
+    }
+
+    function renderFilters() {
+      const catSel = document.getElementById("catFilter");
+      const subSel = document.getElementById("subcatFilter");
+      const curCat = catSel.value || "ALL";
+
+      catSel.innerHTML = `<option value="ALL">Все категории (8)</option>` +
+        CATALOG_BLUEPRINT.map(c => `<option value="${c.cat}" ${c.cat === curCat ? "selected" : ""}>${c.cat}</option>`).join("");
+
+      const subs = curCat === "ALL"
+        ? CATALOG_BLUEPRINT.flatMap(c => c.sub)
+        : (CATALOG_BLUEPRINT.find(c => c.cat === curCat)?.sub || []);
+
+      const curSub = subSel.value || "ALL";
+      subSel.innerHTML = `<option value="ALL">Все подкатегории (${subs.length})</option>` +
+        subs.map(s => `<option value="${s}" ${s === curSub ? "selected" : ""}>${s}</option>`).join("");
+    }
+
+    function renderCatalogGrid() {
+      const user = getUser();
+      const cat = document.getElementById("catFilter").value;
+      const sub = document.getElementById("subcatFilter").value;
+      const q = (document.getElementById("searchInput").value || "").trim().toLowerCase();
+
+      const filtered = products.filter(p => {
+        if (cat !== "ALL" && p.category !== cat) return false;
+        if (sub !== "ALL" && p.subcategory !== sub) return false;
+        if (q && !p.name.toLowerCase().includes(q) && !p.id.toLowerCase().includes(q)) return false;
+        return true;
+      });
+
+      document.getElementById("catalogGrid").innerHTML = filtered.slice(0, 24).map(p =>
+        renderProductCard(p, scoreProduct(user, p))
+      ).join("") + `<div class="muted" style="grid-column:1/-1;">Показано ${Math.min(filtered.length, 24)} из ${filtered.length} подходящих товаров (всего в базе: 200).</div>`;
+    }
+
+    function renderTechMatch(user) {
+      const sel = document.getElementById("baseProductSelect");
+      if (!sel.options.length) {
+        sel.innerHTML = products.slice(0, 50).map(p => `<option value="${p.id}">${p.id} — ${p.name} (${p.price.toLocaleString("ru-RU")} ₸)</option>`).join("");
+      }
+      const baseId = sel.value || "TM001";
+      const linked = relations.filter(r => r.from === baseId).slice(0, 6);
+      document.getElementById("relationsBox").innerHTML = linked.map(r => {
+        const target = products.find(p => p.id === r.to);
+        return `
+          <div class="rel-row">
+            <div><strong>${r.type}</strong> (${r.weight}) → ${target.id} ${target.name} (${target.price.toLocaleString("ru-RU")} ₸)</div>
+            <button onclick="addToCart('${target.id}')">Добавить</button>
+          </div>`;
+      }).join("");
+
+      const boughtIds = state.orders.flatMap(o => o.items.map(i => i.id));
+      const upgSource = boughtIds[0] || "TM001";
+      const upgrades = relations.filter(r => r.from === upgSource && r.type === "Upgrade");
+      document.getElementById("upgradesBox").innerHTML = upgrades.length
+        ? upgrades.map(u => {
+            const target = products.find(p => p.id === u.to);
+            return `<div class="rel-row"><div>Для ${upgSource} рекомендован апгрейд: <strong>${target.id} ${target.name}</strong> (${target.price.toLocaleString("ru-RU")} ₸)</div><button onclick="addToCart('${target.id}')">В корзину</button></div>`;
+          }).join("")
+        : `<div class="muted">Оформите заказ, чтобы увидеть персональные апгрейды.</div>`;
+    }
+
+    function renderCartAndOrders() {
+      const cartEl = document.getElementById("cartItems");
+      const total = state.cart.reduce((s, item) => s + item.price, 0);
+      document.getElementById("cartCount").textContent = state.cart.length;
+      document.getElementById("cartTotal").textContent = `${total.toLocaleString("ru-RU")} ₸`;
+
+      cartEl.innerHTML = state.cart.length
+        ? state.cart.map((item, i) => `
+            <div class="rel-row">
+              <span>${item.id} ${item.name} — ${item.price.toLocaleString("ru-RU")} ₸</span>
+              <button onclick="removeFromCart(${i})">✕</button>
+            </div>`).join("")
+        : `<div class="muted">Корзина пуста</div>`;
+
+      const ordersEl = document.getElementById("ordersBox");
+      ordersEl.innerHTML = state.orders.length
+        ? state.orders.map((ord, idx) => `
+            <div class="rel-row">
+              <div>Заказ #${idx + 1}: ${ord.items.map(i => i.id).join(", ")} (${ord.total.toLocaleString("ru-RU")} ₸)</div>
+              <button class="danger" onclick="returnOrder(${idx})">Возврат</button>
+            </div>`).join("")
+        : `<div class="muted">Покупок пока нет</div>`;
+    }
+
+    function renderLogs() {
+      document.getElementById("eventLog").innerHTML = state.logs.length
+        ? state.logs.map(l => `<div class="log-entry">${l}</div>`).join("")
+        : `<div class="muted">Событий пока нет. Нажмите действие на товаре или «Новое посещение».</div>`;
+    }
+
+    window.interact = function(productId, actionKey) {
+      const user = getUser();
+      const prod = products.find(p => p.id === productId);
+      if (!prod) return;
+      applyDelta(user, prod, actionKey);
+      renderAll();
+    };
+
+    window.addToCart = function(productId) {
+      const user = getUser();
+      const prod = products.find(p => p.id === productId);
+      if (!prod) return;
+      state.cart.push(prod);
+      applyDelta(user, prod, "cart");
+      renderAll();
+    };
+
+    window.removeFromCart = function(index) {
+      state.cart.splice(index, 1);
+      renderAll();
+    };
+
+    window.returnOrder = function(orderIndex) {
+      const user = getUser();
+      const ord = state.orders[orderIndex];
+      if (!ord) return;
+      ord.items.forEach(item => applyDelta(user, item, "returnItem"));
+      state.orders.splice(orderIndex, 1);
+      renderAll();
+    };
+
+    window.openExplain = function(productId) {
+      const user = getUser();
+      const prod = products.find(p => p.id === productId);
+      const sc = scoreProduct(user, prod);
+      document.getElementById("explainTitle").textContent = `Why This Product? — ${prod.id} ${prod.name}`;
+      document.getElementById("explainBody").innerHTML = `
+        <p><strong>Итоговая оценка S_final: ${sc.final.toFixed(3)}</strong></p>
+        <ul>
+          <li>Персональный интерес (S_personal, вес 0.50): <strong>${sc.personal.toFixed(3)}</strong></li>
+          <li>Группа покупателя (S_group, вес 0.20; группы: ${sc.groups.join(", ")}): <strong>${sc.group.toFixed(3)}</strong></li>
+          <li>Связь товаров (S_related, вес 0.20; тип: ${sc.relType}): <strong>${sc.related.toFixed(3)}</strong></li>
+          <li>Популярность (S_popular, вес 0.10): <strong>${sc.popular.toFixed(3)}</strong></li>
+        </ul>
+      `;
+      document.getElementById("explainModal").style.display = "flex";
+    };
+
+    document.getElementById("userSelect").addEventListener("change", e => {
+      state.activeUserId = e.target.value;
+      renderAll();
+    });
+
+    document.getElementById("newVisitBtn").addEventListener("click", () => {
+      const user = getUser();
+      const topProd = products.find(p => p.traits[TRAITS[0]] >= 0.8) || products[0];
+      applyDelta(user, topProd, "revisit");
+      renderAll();
+    });
+
+    document.getElementById("resetDemoBtn").addEventListener("click", () => {
+      state = {
+        activeUserId: "U001",
+        users: JSON.parse(JSON.stringify(INITIAL_USERS)),
+        cart: [],
+        orders: [],
+        logs: ["Модель сброшена к исходным данным."]
+      };
+      renderAll();
+    });
+
+    document.getElementById("checkoutBtn").addEventListener("click", () => {
+      if (!state.cart.length) return;
+      const user = getUser();
+      const total = state.cart.reduce((s, i) => s + i.price, 0);
+      const items = [...state.cart];
+      state.orders.unshift({ items, total });
+      items.forEach(i => applyDelta(user, i, "buy"));
+      state.cart = [];
+      renderAll();
+    });
+
+    document.getElementById("catFilter").addEventListener("change", () => { renderFilters(); renderCatalogGrid(); });
+    document.getElementById("subcatFilter").addEventListener("change", renderCatalogGrid);
+    document.getElementById("searchInput").addEventListener("input", renderCatalogGrid);
+    document.getElementById("baseProductSelect").addEventListener("change", () => renderTechMatch(getUser()));
+    document.getElementById("closeModalBtn").addEventListener("click", () => {
+      document.getElementById("explainModal").style.display = "none";
+    });
+
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const isCat = btn.dataset.tab === "catalog";
+        document.getElementById("tabCatalog").style.display = isCat ? "block" : "none";
+        document.getElementById("tabTechmatch").style.display = isCat ? "none" : "block";
+      });
+    });
+
+    renderAll();
+  </script>
+</body>
+</html>
